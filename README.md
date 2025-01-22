@@ -1,6 +1,8 @@
 CodiMD
 ===
 
+# This is a fork of the original CodiMD project. The original project can be found [here](https://github.com/hackmdio/codimd).
+
 [![build status][travis-image]][travis-url]
 [![version][github-version-badge]][github-release-page]
 [![Gitter][gitter-image]][gitter-url]
