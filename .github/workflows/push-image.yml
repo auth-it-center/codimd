@@ -15,7 +15,7 @@ on:
         default: 'hackmdio/buildpack:16.20.2-35fe7e39'
 
 env:
-  REGISTRY_IMAGE: ${{ secrets.NEXUS_REGISTRY }}/lamprosfasoulas/codimd
+  REGISTRY_IMAGE: lamprosfasoulas/codimd
 
 jobs:
   build:
@@ -58,8 +58,8 @@ jobs:
           platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           tags: |
-            ${{ env.REGISTRY_IMAGE }}:latest
-            ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ secrets.NEXUS_REGISTRY }}/${{ env.REGISTRY_IMAGE }}:latest
+            ${{ secrets.NEXUS_REGISTRY }}/${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
 
           build-args: |
             RUNTIME=${{ github.event.inputs.runtime || 'hackmdio/runtime:16.20.2-35fe7e39' }}
