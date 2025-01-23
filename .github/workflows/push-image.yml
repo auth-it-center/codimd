@@ -15,7 +15,7 @@ on:
         default: 'hackmdio/buildpack:16.20.2-35fe7e39'
 
 env:
-  REGISTRY_IMAGE: lamprosfasoulas/codimd
+  REGISTRY_IMAGE: codimd
 
 jobs:
   build:
