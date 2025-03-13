@@ -20,13 +20,12 @@ Command-line utility to create users for email-signin.
 Usage: bin/manage_users [--pass password] (--add | --del) user-email
   Options:
     --add\tAdd user with the specified user-email
-    --del\tDelete user with specified user-email
+    --del\tDelete user with specified LDAP username
+    --delOrphan delete orphan notes
     --reset\tReset user password with specified user-email
     --pass\tUse password from cmdline rather than prompting
 `)
-  //editme
-  //--del\tDelete user with specified LDAP username
-  //--delOrphan delete orphan notes
+  // modhere
   process.exit(1)
 }
 
@@ -61,55 +60,52 @@ async function createUser (argv) {
 // Using an async function to be able to use await inside
 async function deleteUser (argv) {
   // Cannot delete non-existing users
-  const existingUser = await models.User.findOne({ where: { email: argv['del'] } })
-  //editme
-  // const existingUser = await models.User.findOne({ where: { profileid: "LDAP-"+argv['del'] } })
+  // modhere
+  const existingUser = await models.User.findOne({ where: { profileid: "LDAP-"+argv['del'] } })
   if (!existingUser) {
-    console.log(`User with e-mail ${argv['del']} does not exist, cannot delete`)
-    //editme
-    // console.log(`User with profileid LDAP-${argv['del']} does not exist, cannot delete`)
+    console.log(`User with profileid LDAP-${argv['del']} does not exist, cannot delete`)
     process.exit(1)
   }
-  // editme
+  // modhere
   // Here we delete PERMANENTLY ALL the notes belonging to the Deleted
   // USER
   // #############################################
-  // try {
-  //  const deleteNote = await models.Note.destroy({
-  //    where: {
-  //      ownerId: existingUser.id
-  //    }
-  //  });
-  // } catch (error){
-  //  console.log(`Error deleting note:`,error)
-  // }
+   try {
+    const deleteNote = await models.Note.destroy({
+      where: {
+        ownerId: existingUser.id
+      }
+    });
+   } catch (error){
+    console.log(`Error deleting note:`,error)
+   }
   // #############################################
   // Delete USER uploads
   // #############################################
-  // const uploadDir = '/home/hackmd/app/public/uploads'
-  // try {
-  //    fs.accessSync(uploadDir, fs.constants.F_OK)
-  // } catch (e) {
-  //    console.log(`Error: `,e)
-  // }
-  // let files
-  // try {
-  //    files = fs.readdirSync(uploadDir)
-  // } catch (e) {
-  //    console.log(`Error reading directory:`,e)
-  // }
-  // const filesToDelete = files.filter(file => {
-  //    return file.includes(`_${existingUser.id}_`,filesToDelete)
-  // })
-  // filesToDelete.forEach(file => {
-  //    const filePath = path.join(uploadDir, file)
-  //    try {
-  //        fs.unlinkSync(filePath)
-  //        console.log(`Deleted file: `, filePath)
-  //    } catch (e) {
-  //        console.log(`Error Deleting file: `,e)
-  //    }
-  // });
+   const uploadDir = '/home/hackmd/app/public/uploads'
+   try {
+      fs.accessSync(uploadDir, fs.constants.F_OK)
+   } catch (e) {
+      console.log(`Error: `,e)
+   }
+   let files
+   try {
+      files = fs.readdirSync(uploadDir)
+   } catch (e) {
+      console.log(`Error reading directory:`,e)
+   }
+   const filesToDelete = files.filter(file => {
+      return file.includes(`_${existingUser.id}_`,filesToDelete)
+   })
+   filesToDelete.forEach(file => {
+      const filePath = path.join(uploadDir, file)
+      try {
+          fs.unlinkSync(filePath)
+          console.log(`Deleted file: `, filePath)
+      } catch (e) {
+          console.log(`Error Deleting file: `,e)
+      }
+   });
   // #############################################
 
   // Sadly .destroy() does not return any success value with all
@@ -119,22 +115,22 @@ async function deleteUser (argv) {
 }
 // Func to delete orphans
 //
-// const { Op, Sequelize } = require('sequelize')
-// async function deleteOrphan() {
-//    try {
-//        await models.Note.destroy({
-//            where: {
-//                ownerId: {
-//                    [Sequelize.Op.notIn]: Sequelize.literal('(SELECT id FROM "Users")')
-//                }
-//            }
-//        })
-//        console.log(`Deleted orphan notes`)
-//    } catch (e) {
-//        console.log(`Error deleting orphans: `, e)
-//    }
-// }
-//
+ const { Op, Sequelize } = require('sequelize')
+ async function deleteOrphan() {
+    try {
+        await models.Note.destroy({
+            where: {
+                ownerId: {
+                    [Sequelize.Op.notIn]: Sequelize.literal('(SELECT id FROM "Users")')
+                }
+            }
+        })
+        console.log(`Deleted orphan notes`)
+    } catch (e) {
+        console.log(`Error deleting orphans: `, e)
+    }
+ }
+
 
 
 // Using an async function to be able to use await inside
@@ -157,8 +153,9 @@ async function resetUser (argv) {
 const options = {
   add: createUser,
   del: deleteUser,
-  reset: resetUser
-}
+  reset: resetUser,
+  delOrphan: deleteOrphan
+}//modhere
 
 // Perform commandline-parsing
 const argv = minimist(process.argv.slice(2))

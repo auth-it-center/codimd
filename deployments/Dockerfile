@@ -19,6 +19,8 @@ RUN set -xe && \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
 
 FROM $RUNTIME
+USER root
+RUN apt-get update && apt-get install ldap-utils -y
 USER hackmd
 ENV QT_QPA_PLATFORM=offscreen
 WORKDIR /home/hackmd/app
