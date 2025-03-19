@@ -1,2 +1,2 @@
-* * * * * /home/hackmd/app/bin/checkusers.sh >> /var/log/cron.log 2>&1
+0 23 * * * /home/hackmd/app/bin/checkusers.sh >> /var/log/cron.log 2>&1
 
