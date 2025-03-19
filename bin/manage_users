@@ -66,10 +66,12 @@ async function deleteUser (argv) {
     console.log(`User with profileid LDAP-${argv['del']} does not exist, cannot delete`)
     process.exit(1)
   }
+    console.log(`Deleting user LDAP-${argv['del']}`)
   // modhere
   // Here we delete PERMANENTLY ALL the notes belonging to the Deleted
   // USER
   // #############################################
+    console.log(`Deleting user LDAP-${argv['del']} notes`)
    try {
     const deleteNote = await models.Note.destroy({
       where: {
@@ -82,6 +84,7 @@ async function deleteUser (argv) {
   // #############################################
   // Delete USER uploads
   // #############################################
+    console.log(`Deleting user LDAP-${argv['del']} uploads`)
    const uploadDir = '/home/hackmd/app/public/uploads'
    try {
       fs.accessSync(uploadDir, fs.constants.F_OK)

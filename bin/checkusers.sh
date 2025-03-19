@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 isActive() {
-  value=$(ldapsearch -x -H $CMD_LDAP_URL -D "$CMD_LDAP_BINDDN" -w $CMD_LDAP_BINDCREDENTIALS -b $CMD_LDAP_SEARCHBASE $search)
-  if echo $value | grep -q "ISACTIVE"; then
+  if ldapsearch -x -H $CMD_LDAP_URL -D "$CMD_LDAP_BINDDN" -w $CMD_LDAP_BINDCREDENTIALS -b $CMD_LDAP_SEARCHBASE $search | grep -q -e "^uid:"; then
     return 0
   else
     return 1
@@ -16,5 +15,7 @@ while IFS=' ' read -r word; do
     echo "The account is active"
   else
     echo "The account must be destroyed"
+    /home/hackmd/app/bin/manage_users --del $uid
+    /home/hackmd/app/bin/manage_users --delOrphan $uid
   fi
 done <<< "$res"
