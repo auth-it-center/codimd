@@ -7,6 +7,7 @@ COPY --chown=hackmd:hackmd . .
 ENV QT_QPA_PLATFORM=offscreen
 
 RUN set -xe && \
+    apt-get update && apt-get install ldap-utils cron -y && \
     git reset --hard && \
     git clean -fx && \
     npm install && \
@@ -20,7 +21,6 @@ RUN set -xe && \
 
 FROM $RUNTIME
 USER root
-RUN apt-get update && apt-get install ldap-utils cron -y
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjon /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
