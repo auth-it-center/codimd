@@ -6,8 +6,8 @@ FROM $BUILDPACK AS BUILD
 COPY --chown=hackmd:hackmd . .
 ENV QT_QPA_PLATFORM=offscreen
 
-USER root
-RUN bash -c "apt-get update && apt-get install -y --no-install-recommends ldap-utils cron"
+USER 0
+RUN apt-get update && apt-get install -y --no-install-recommends ldap-utils cron
 USER hackmd
 RUN set -xe && \
     git reset --hard && \
