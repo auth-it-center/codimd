@@ -27,7 +27,7 @@ RUN apt-get update && \
 
 FROM $RUNTIME
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends vim 
+RUN apt update && apt install -y vim 
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 COPY --from=cron /usr/sbin/cron /usr/sbin/cron
 COPY --from=cron /usr/bin/crontab /usr/bin/crontab
