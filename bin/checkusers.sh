@@ -12,16 +12,16 @@ isActive() {
 deleteUser(){
   # Deleting users from postgres database
   local profileid="$1"
-  psql $CMD_DB_URL <<-SQL
-  DELETE FROM "Users" WHERE profileid = '${profileid}';
-  SQL
+psql $CMD_DB_URL <<-SQL
+DELETE FROM "Users" WHERE profileid = '${profileid}';
+SQL
 }
 deleteNotes(){
   # Deleting all user's notes from postgres database
   local id="$1"
-  psql $CMD_DB_URL <<-SQL
-  DELETE FROM "Notes" where "ownerId" = '${id}';
-  SQL
+psql $CMD_DB_URL <<-SQL
+DELETE FROM "Notes" where "ownerId" = '${id}';
+SQL
 }
 deleteFiles(){
   # Deleting all user's uploads from location /home/hackmd/app/public/uploads
@@ -31,17 +31,24 @@ deleteFiles(){
 }
 
 allusers=$(psql $CMD_DB_URL -t -c 'SELECT profileid FROM "Users";')
-while IFS=' ' read -r word; do
+while IFS=' ' read -r username; do
   # Extracting the username (removing LDAP- prefix)
-  uid=$(echo $word | cut -d '-' -f2)
+  uid=$(echo $username | cut -d '-' -f2)
   # Creating the ldap search query
   query=$(echo $CMD_LDAP_SEARCHFILTER | sed "s#{{username}}#${uid}#")
+id=$(psql $CMD_DB_URL -t -A <<-SQL
+SELECT id FROM "Users" WHERE profileid = '${username}';
+SQL
+)
   # Check if the user exists in the ldap as active user
   if isActive; then
     echo "The account $uid  is active"
   else
     echo "The account $uid must be destroyed"
     echo "Beggining destruction..."
+    deleteUser $username
+    deleteNotes $id
+    deleteFiles $id
 
   fi
 done <<< "$allusers"
