@@ -18,7 +18,7 @@ RUN set -xe && \
         test docs contribute \
         package-lock.json webpack.prod.js webpack.htmlexport.js webpack.dev.js webpack.common.js \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
-        
+
 FROM $RUNTIME
 USER root
 RUN rm -f /etc/apt/sources.list.d/*.list && \
@@ -31,6 +31,7 @@ RUN rm -f /etc/apt/sources.list.d/*.list && \
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
+RUN env > /etc/environment
 RUN crontab /etc/cron.d/checkusers
 RUN cron
 USER hackmd
