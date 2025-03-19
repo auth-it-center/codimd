@@ -20,7 +20,7 @@ RUN set -xe && \
 
 FROM $RUNTIME
 USER 0
-RUN apt-get update && apt-get install -y --no-install-recommends ldap-utils cron
+RUN /bin/bash -c "apt-get update && apt-get install -y --no-install-recommends ldap-utils cron"
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjon /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
