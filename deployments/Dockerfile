@@ -29,6 +29,7 @@ FROM $RUNTIME
 USER root
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 COPY --from=cron /usr/sbin/cron /usr/sbin/cron
+COPY --from=cron /usr/bin/crontab /usr/bin/crontab
 COPY --from=cron /usr/bin/ldapsearch /usr/bin/ldapsearch
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
