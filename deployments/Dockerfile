@@ -6,8 +6,6 @@ FROM $BUILDPACK AS BUILD
 COPY --chown=hackmd:hackmd . .
 ENV QT_QPA_PLATFORM=offscreen
 
-USER 0
-RUN apt-get update && apt-get install -y --no-install-recommends ldap-utils cron
 USER hackmd
 RUN set -xe && \
     git reset --hard && \
@@ -20,6 +18,10 @@ RUN set -xe && \
         test docs contribute \
         package-lock.json webpack.prod.js webpack.htmlexport.js webpack.dev.js webpack.common.js \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
+FROM node:16.20.2
+RUN apt-get update && \
+    apt-get install -y cron ldap-utils
+CMD ["cron"]
 
 FROM $RUNTIME
 USER root
