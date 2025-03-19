@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+env > /etc/environment
+
+cron
+
+su - hackmd
+
 set -euo pipefail
 
 if [[ "$#" -gt 0 ]]; then
