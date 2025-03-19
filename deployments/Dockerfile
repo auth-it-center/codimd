@@ -19,7 +19,7 @@ RUN set -xe && \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
 
 FROM $RUNTIME
-USER root
+USER 0
 RUN apt-get update && apt-get install -y --no-install-recommends ldap-utils cron
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjon /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
