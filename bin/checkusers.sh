@@ -29,8 +29,13 @@ deleteFiles(){
   # The files are saved as upload_{user.id}_{random letters}.{jpg,png,...}
   find /home/hackmd/app/public/uploads -type f -name "upload_${id}_*" -delete; 2>&1
 }
-
+# Write down the date-time
+date
 allusers=$(psql $CMD_DB_URL -t -c 'SELECT profileid FROM "Users";')
+if [ -z "$allusers" ]; then
+    echo "Ha Ha nothing to delete"
+    exit
+fi
 while IFS=' ' read -r username; do
   # Extracting the username (removing LDAP- prefix)
   uid=$(echo $username | cut -d '-' -f2)
