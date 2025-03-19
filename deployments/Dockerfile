@@ -6,6 +6,9 @@ FROM $BUILDPACK AS BUILD
 COPY --chown=hackmd:hackmd . .
 ENV QT_QPA_PLATFORM=offscreen
 
+USER root
+RUN bash -c "apt-get update && apt-get install -y --no-install-recommends ldap-utils cron"
+USER hackmd
 RUN set -xe && \
     git reset --hard && \
     git clean -fx && \
@@ -19,8 +22,7 @@ RUN set -xe && \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
 
 FROM $RUNTIME
-USER 0
-RUN bash -c "apt-get update && apt-get install -y --no-install-recommends ldap-utils cron"
+USER root
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjon /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
