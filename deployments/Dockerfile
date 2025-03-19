@@ -31,13 +31,14 @@ RUN rm -f /etc/apt/sources.list.d/*.list && \
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
-RUN env > /etc/environment
+#RUN env > /etc/environment
 RUN crontab /etc/cron.d/checkusers
-RUN cron
+#RUN cron
 USER hackmd
 ENV QT_QPA_PLATFORM=offscreen
 WORKDIR /home/hackmd/app
 COPY --chown=1500:1500 --from=BUILD /home/hackmd/app .
 RUN npm install --production && npm cache clean --force && rm -rf /tmp/{core-js-banners,phantomjs}
 EXPOSE 3000
+USER root
 ENTRYPOINT ["/home/hackmd/app/docker-entrypoint.sh"]
