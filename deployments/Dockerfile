@@ -19,19 +19,11 @@ RUN set -xe && \
         package-lock.json webpack.prod.js webpack.htmlexport.js webpack.dev.js webpack.common.js \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
         
-FROM node:16.20.2 AS cron
-USER 0
-RUN apt-get update && \
-    apt-get install -y cron ldap-utils
-
-
 FROM $RUNTIME
 USER root
-RUN apt update && apt install -y vim 
+RUN apt update & apt install -y cron ldap-utils
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
-COPY --from=cron /usr/sbin/cron /usr/sbin/cron
-COPY --from=cron /usr/bin/crontab /usr/bin/crontab
-COPY --from=cron /usr/bin/ldapsearch /usr/bin/ldapsearch
+
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
 RUN crontab /etc/cron.d/checkusers
