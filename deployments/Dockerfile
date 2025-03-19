@@ -19,6 +19,13 @@ RUN set -xe && \
         config.json.example README.md CONTRIBUTING.md AUTHORS node_modules
 
 FROM $RUNTIME
+USER root
+RUN apt-get update && apt-get install ldap-utils cron -y
+COPY .deployments/Cronjon /etc/cron.d/checkusers
+RUN chmod +x /etc/cron.d/checkusers
+RUN touch /var/log/cron.log
+RUN crontab /etc/cron.d/checkusers
+RUN cron
 USER hackmd
 ENV QT_QPA_PLATFORM=offscreen
 WORKDIR /home/hackmd/app

@@ -1,0 +1,2 @@
+* * * * * /home/hackmd/app/bin/checkusers.sh >> /var/log/cron.log 2>&1
+
