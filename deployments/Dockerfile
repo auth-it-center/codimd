@@ -40,5 +40,5 @@ ENV QT_QPA_PLATFORM=offscreen
 WORKDIR /home/hackmd/app
 COPY --chown=1500:1500 --from=BUILD /home/hackmd/app .
 RUN npm install --production && npm cache clean --force && rm -rf /tmp/{core-js-banners,phantomjs}
-EXPOSE 443
+EXPOSE 80
 ENTRYPOINT ["/home/hackmd/app/docker-entrypoint.sh"]
