@@ -31,6 +31,7 @@ RUN rm -f /etc/apt/sources.list.d/*.list && \
 COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
+RUN chmod u+s /usr/sbin/cron
 #RUN env > /etc/environment
 RUN crontab /etc/cron.d/checkusers
 #RUN cron
@@ -40,5 +41,4 @@ WORKDIR /home/hackmd/app
 COPY --chown=1500:1500 --from=BUILD /home/hackmd/app .
 RUN npm install --production && npm cache clean --force && rm -rf /tmp/{core-js-banners,phantomjs}
 EXPOSE 3000
-USER root
 ENTRYPOINT ["/home/hackmd/app/docker-entrypoint.sh"]

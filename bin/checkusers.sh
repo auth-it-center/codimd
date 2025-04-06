@@ -2,10 +2,9 @@
 # The script uses Cronjob to run once a day to check for expired users
 # It is vital to have RUN env > /etc/environment in Dockerfile so that
 # cronjob can have access to env variables from docker
+. /home/hackmd/cron.env
 isActive() {
-  if ldapres=$(ldapsearch -x -H $CMD_LDAP_URL -D "$CMD_LDAP_BINDDN" -w $CMD_LDAP_BINDCREDENTIALS -b $CMD_LDAP_SEARCHBASE $query 2>/dev/null); then
-    echo "Ldap is UP. Continue..."
-  else
+  if ! ldapres=$(ldapsearch -x -H $CMD_LDAP_URL -D "$CMD_LDAP_BINDDN" -w $CMD_LDAP_BINDCREDENTIALS -b $CMD_LDAP_SEARCHBASE $query 2>/dev/null); then
     echo "Ldap is DOWN. Exiting..."
     exit 1
   fi
