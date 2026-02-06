@@ -5,6 +5,7 @@
 . /home/hackmd/cron.env
 UPLOADS_DIR="/home/hackmd/app/public/uploads"
 TRASH_DIR="/home/hackmd/trash"
+
 isActive() {
   if ! ldapres=$(ldapsearch -x -H $CMD_LDAP_URL -D "$CMD_LDAP_BINDDN" -w $CMD_LDAP_BINDCREDENTIALS -b $CMD_LDAP_SEARCHBASE $query 2>/dev/null); then
     echo "Ldap is DOWN. Exiting..."
@@ -16,6 +17,7 @@ isActive() {
     return 1
   fi
 }
+
 deleteUser(){
   # Deleting users from postgres database
   local profileid="$1"
@@ -23,6 +25,7 @@ psql $CMD_DB_URL <<-SQL
 DELETE FROM "Users" WHERE profileid = '${profileid}';
 SQL
 }
+
 deleteNotes(){
   # Deleting all user's notes from postgres database and moving them to
   # trash can
@@ -32,11 +35,11 @@ SQL
 )
 while IFS=' ' read shortid; do
 title=$(psql $CMD_DB_URL -At<<-SQL
-SELECT content FROM "Notes" where shortid = '${shortid}';
+SELECT title FROM "Notes" where shortid = '${shortid}';
 SQL
 )
-  safe_title=$(echo "$title" | tr -cd '[:alnum:]._-')
-  filename="${USER_TRASH_DIR}/${safe_title}.md"
+safe_title=$(echo "$title" | tr -cd '[:alnum:]._-')
+filename="${USER_TRASH_DIR}/${safe_title}.md"
 
 content=$(psql $CMD_DB_URL -At<<-SQL
 SELECT content FROM "Notes" WHERE shortid = '${shortid}';
@@ -50,11 +53,13 @@ psql $CMD_DB_URL <<-SQL
 DELETE FROM "Notes" where "ownerId" = '${id}';
 SQL
 }
+
 deleteFiles(){
   # Deleting all user's uploads from location /home/hackmd/app/public/uploads
   # The files are saved as upload_{user.id}_{random letters}.{jpg,png,...}
   find $UPLOADS_DIR -type f -name "upload_${id}_*" -exec mv {} "$USER_TRASH_DIR" \; 2>&1
 }
+
 actuallyDeleteFiles(){
   # Deleting all user's uploads from location /home/hackmd/app/public/uploads
   # The files are saved as upload_{user.id}_{random letters}.{jpg,png,...}
@@ -62,6 +67,7 @@ actuallyDeleteFiles(){
   echo "Removing old trash files"
   find $TRASH_DIR -mindepth 1 -maxdepth 1 -type d -mtime +90 -exec rm -rf {} \; 2>&1
 }
+
 # Write down the date-time
 date
 # Removing old trash files
