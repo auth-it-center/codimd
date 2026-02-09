@@ -43,7 +43,11 @@
 
             <div id="home" class="section"<% if(signin) { %> style="display:none;"<% } %>>
                 <div class="inner cover">
-                    <h1 class="cover-heading"><i class="fa fa-file-text"></i> CodiMD</h1>
+                    <h1 class="cover-heading">
+                        <!-- <i class="fa fa-file-text"></i> -->
+                        <img src="<%- serverURL %>/it-logo.png" alt="IT logo"style="width: 125px; height: 125px; object-fit: contain;"/>
+                        AuthMD
+                    </h1>
                     <p class="lead">
                         <%= __('Best way to write and share your knowledge in markdown.') %>
                     </p>
@@ -153,6 +157,9 @@
                         <option value="id">Bahasa Indonesia</option>
                         <option value="sr">српски</option>
                     </select>
+                    <p>
+                        <%- __('Source code for this Fork %s', '<a href="https://github.com/lamprosfasoulas/codimd">Fork Source</a>') %>
+                    </p>
                     <p>
                         <%- __('Powered by %s', '<a href="https://github.com/hackmdio/codimd">CodiMD</a>') %> | <a href="<%- serverURL %>/s/release-notes" target="_blank" rel="noopener"><%= __('Releases') %></a> | <a href="<%- sourceURL %>" target="_blank" rel="noopener"><%= __('Source Code') %></a><% if(privacyStatement) { %> | <a href="<%- serverURL %>/s/privacy" target="_blank" rel="noopener"><%= __('Privacy') %></a><% } %><% if(termsOfUse) { %> | <a href="<%- serverURL %>/s/terms-of-use" target="_blank" rel="noopener"><%= __('Terms of Use') %></a><% } %>
                     </p>

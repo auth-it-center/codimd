@@ -1,7 +1,10 @@
 CodiMD
 ===
 
+### This is a fork of the original CodiMD project. The original project can be found [here](https://github.com/hackmdio/codimd).
+
 [![build status][build-image]][build-url]
+
 [![version][github-version-badge]][github-release-page]
 [![Gitter][gitter-image]][gitter-url]
 [![Matrix][matrix-image]][matrix-url]
