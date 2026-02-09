@@ -3,7 +3,8 @@ CodiMD
 
 ### This is a fork of the original CodiMD project. The original project can be found [here](https://github.com/hackmdio/codimd).
 
-[![build status][travis-image]][travis-url]
+[![build status][build-image]][build-url]
+
 [![version][github-version-badge]][github-release-page]
 [![Gitter][gitter-image]][gitter-url]
 [![Matrix][matrix-image]][matrix-url]
@@ -95,8 +96,8 @@ To stay up to date with your installation it's recommended to subscribe the [rel
 
 [gitter-image]: https://img.shields.io/badge/gitter-hackmdio/codimd-blue.svg
 [gitter-url]: https://gitter.im/hackmdio/hackmd
-[travis-image]: https://travis-ci.com/hackmdio/codimd.svg?branch=master
-[travis-url]: https://travis-ci.com/hackmdio/codimd
+[build-image]: https://github.com/hackmdio/codimd/actions/workflows/build.yml/badge.svg
+[build-url]: https://github.com/hackmdio/codimd/actions/workflows/build.yml
 [github-version-badge]: https://img.shields.io/github/release/hackmdio/codimd.svg
 [github-release-page]: https://github.com/hackmdio/codimd/releases
 [github-release-feed]: https://github.com/hackmdio/codimd/releases.atom

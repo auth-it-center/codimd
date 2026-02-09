@@ -167,6 +167,11 @@ module.exports = {
         to: 'reveal.js/plugin'
       },
       {
+        context: path.join(__dirname, 'public/js'),
+        from: 'revealjs-plugins',
+        to: 'revealjs-plugins'
+      },
+      {
         context: path.join(__dirname, 'node_modules/dictionary-de'),
         from: '*',
         to: 'dictionary-de/'
@@ -200,9 +205,21 @@ module.exports = {
         context: path.join(__dirname, 'node_modules/fork-awesome'),
         from: 'css',
         to: 'fork-awesome/css'
+      },
+      {
+        context: path.join(__dirname, 'node_modules/mermaid'),
+        from: 'dist/mermaid.min.js',
+        to: 'mermaid/mermaid.min.js'
       }
     ]),
-    new MiniCssExtractPlugin()
+    new MiniCssExtractPlugin(
+      process.env.NODE_ENV === 'production'
+      ? {
+          filename: '[name].[contenthash].css',
+          chunkFilename: '[name].[contenthash].css',
+        }
+      : {},
+    )
   ],
 
   entry: {
@@ -214,7 +231,8 @@ module.exports = {
       'bootstrap'
     ],
     cover: [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       path.join(__dirname, 'public/js/cover.js')
     ],
     'cover-styles-pack': [
@@ -224,14 +242,16 @@ module.exports = {
       path.join(__dirname, 'node_modules/select2/select2-bootstrap.css')
     ],
     'cover-pack': [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'bootstrap-validator',
       'expose-loader?select2!select2',
       'expose-loader?moment!moment',
       path.join(__dirname, 'public/js/cover.js')
     ],
     index: [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'script-loader!jquery-ui-resizable',
       'script-loader!codemirror',
       'script-loader!inlineAttachment',
@@ -240,7 +260,6 @@ module.exports = {
       'script-loader!ot',
       'flowchart.js',
       'imports-loader?Raphael=raphael!js-sequence-diagrams',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       path.join(__dirname, 'public/js/index.js')
     ],
     'index-styles': [
@@ -263,6 +282,7 @@ module.exports = {
       path.join(__dirname, 'public/css/codemirror-extend/ayu-mirage.css'),
       path.join(__dirname, 'public/css/codemirror-extend/tomorrow-night-bright.css'),
       path.join(__dirname, 'public/css/codemirror-extend/tomorrow-night-eighties.css'),
+      path.join(__dirname, 'public/css/codemirror-extend/one-dark.css'),
       path.join(__dirname, 'node_modules/@hackmd/codemirror/mode/tiddlywiki/tiddlywiki.css'),
       path.join(__dirname, 'node_modules/@hackmd/codemirror/mode/mediawiki/mediawiki.css'),
       path.join(__dirname, 'public/css/github-extract.css'),
@@ -278,11 +298,11 @@ module.exports = {
       path.join(__dirname, 'node_modules/leaflet/dist/leaflet.css')
     ],
     'index-pack': [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'script-loader!jquery-ui-resizable',
       'bootstrap-validator',
       'expose-loader?jsyaml!js-yaml',
-      'script-loader!mermaid',
       'expose-loader?moment!moment',
       'script-loader!handlebars',
       'expose-loader?hljs!highlight.js',
@@ -302,15 +322,14 @@ module.exports = {
       'script-loader!vega-lite',
       'script-loader!vega-embed',
       'expose-loader?io!socket.io-client',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       'expose-loader?L!leaflet',
       path.join(__dirname, 'public/js/index.js')
     ],
     pretty: [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'flowchart.js',
       'imports-loader?Raphael=raphael!js-sequence-diagrams',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       path.join(__dirname, 'public/js/pretty.js')
     ],
     'pretty-styles': [
@@ -325,9 +344,9 @@ module.exports = {
       path.join(__dirname, 'node_modules/leaflet/dist/leaflet.css')
     ],
     'pretty-pack': [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'expose-loader?jsyaml!js-yaml',
-      'script-loader!mermaid',
       'expose-loader?moment!moment',
       'script-loader!handlebars',
       'expose-loader?hljs!highlight.js',
@@ -341,16 +360,15 @@ module.exports = {
       'script-loader!vega',
       'script-loader!vega-lite',
       'script-loader!vega-embed',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       'expose-loader?L!leaflet',
       path.join(__dirname, 'public/js/pretty.js')
     ],
     slide: [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'bootstrap-tooltip',
       'flowchart.js',
       'imports-loader?Raphael=raphael!js-sequence-diagrams',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       path.join(__dirname, 'public/js/slide.js')
     ],
     'slide-styles': [
@@ -364,13 +382,13 @@ module.exports = {
       path.join(__dirname, 'node_modules/leaflet/dist/leaflet.css')
     ],
     'slide-pack': [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'expose-loader?jQuery!expose-loader?$!jquery',
       'velocity-animate',
       'imports-loader?$=jquery!jquery-mousewheel',
       'bootstrap-tooltip',
       'expose-loader?jsyaml!js-yaml',
-      'script-loader!mermaid',
       'expose-loader?moment!moment',
       'script-loader!handlebars',
       'expose-loader?hljs!highlight.js',
@@ -385,7 +403,6 @@ module.exports = {
       'script-loader!vega-lite',
       'script-loader!vega-embed',
       'expose-loader?Reveal!reveal.js',
-      'expose-loader?RevealMarkdown!reveal-markdown',
       'expose-loader?L!leaflet',
       path.join(__dirname, 'public/js/slide.js')
     ]
@@ -399,14 +416,13 @@ module.exports = {
 
   resolve: {
     modules: ['node_modules'],
-    extensions: ['.js'],
+    extensions: ['.js', '.mjs'],
     alias: {
       codemirror: path.join(__dirname, 'node_modules/@hackmd/codemirror/codemirror.min.js'),
       inlineAttachment: path.join(__dirname, 'public/vendor/inlineAttachment/inline-attachment.js'),
       jqueryTextcomplete: path.join(__dirname, 'public/vendor/jquery-textcomplete/jquery.textcomplete.js'),
       codemirrorInlineAttachment: path.join(__dirname, 'public/vendor/inlineAttachment/codemirror.inline-attachment.js'),
       ot: path.join(__dirname, 'public/vendor/ot/ot.min.js'),
-      mermaid: path.join(__dirname, 'node_modules/mermaid/dist/mermaid.min.js'),
       handlebars: path.join(__dirname, 'node_modules/handlebars/dist/handlebars.min.js'),
       'jquery-ui-resizable': path.join(__dirname, 'public/vendor/jquery-ui/jquery-ui.min.js'),
       'gist-embed': path.join(__dirname, 'node_modules/gist-embed/gist-embed.min.js'),
@@ -439,7 +455,42 @@ module.exports = {
   module: {
     rules: [{
       test: /\.mjs$/,
+      type: 'javascript/auto',
+      include: /node_modules/
+    }, {
+      test: /node_modules\/markmap.*\/.*\.mjs$/,
+      use: [{ loader: 'babel-loader' }],
       type: 'javascript/auto'
+    }, {
+      test: /node_modules\/markmap.*\/.*\.js$/,
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ['@babel/preset-env', {
+              modules: 'cjs'
+            }]
+          ]
+        }
+      }]
+    }, {
+      test: /node_modules\/yaml\/browser\/dist\/.*\.js$/,
+      use: [{ loader: 'babel-loader' }]
+    }, {
+      test: /node_modules\/@vscode\/markdown-it-katex\/.*\.js$/,
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ['@babel/preset-env', {
+              modules: 'cjs'
+            }]
+          ],
+          plugins: [
+            '@babel/plugin-transform-optional-chaining'
+          ]
+        }
+      }]
     }, {
       test: /\.js$/,
       use: [{ loader: 'babel-loader' }],

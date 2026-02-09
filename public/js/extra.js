@@ -11,8 +11,8 @@ import unescapeHTML from 'lodash/unescape'
 
 import isURL from 'validator/lib/isURL'
 
-import { transform } from 'markmap-lib/dist/transform'
-import { Markmap } from 'markmap-lib/dist/view'
+import { Transformer } from 'markmap-lib'
+import { Markmap, loadCSS, loadJS } from 'markmap-view'
 
 import { stripTags } from '../../utils/string'
 
@@ -28,7 +28,7 @@ import './lib/renderer/lightbox'
 import { renderCSVPreview } from './lib/renderer/csvpreview'
 
 import { escapeAttrValue } from './render'
-import { sanitizeUrl } from './utils'
+import { sanitizeUrl, isPdfUrl } from './utils'
 
 import markdownit from 'markdown-it'
 import markdownitContainer from 'markdown-it-container'
@@ -51,6 +51,9 @@ let viz = new window.Viz()
 const plantumlEncoder = require('plantuml-encoder')
 
 const ui = getUIElements()
+
+// Initialize markmap transformer
+const markmapTransformer = new Transformer()
 
 // auto update last change
 window.createtime = null
@@ -254,7 +257,10 @@ function replaceExtraTags (html) {
 }
 
 if (typeof window.mermaid !== 'undefined' && window.mermaid) {
-  window.mermaid.startOnLoad = false
+  window.mermaid.initialize({
+    startOnLoad: false
+  })
+
   window.mermaid.parseError = function (err, hash) {
     console.warn(err)
   }
@@ -433,22 +439,26 @@ export function finishView (view) {
   })
   // mermaid
   const mermaids = view.find('div.mermaid.raw').removeClass('raw')
-  mermaids.each((key, value) => {
+  mermaids.each(async (key, value) => {
+    const $value = $(value)
+    const $ele = $value.closest('pre')
     try {
-      var $value = $(value)
-      const $ele = $(value).closest('pre')
-
       const text = $value.text()
       // validate the syntax first
       if (window.mermaid.parse(text)) {
         $ele.addClass('mermaid')
         $ele.text(text)
         // render the diagram
-        window.mermaid.init(undefined, $ele)
+        const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        const { svg, bindFunctions } = await window.mermaid.render(id, text, $ele[0])
+        $ele.html(svg)
+        if (bindFunctions) {
+          bindFunctions($ele[0])
+        }
       }
     } catch (err) {
       $value.unwrap()
-      $value.parent().append(`<div class="alert alert-warning">${escapeHTML(err.str)}</div>`)
+      $ele.append(`<div class="alert alert-warning">${escapeHTML(err)}</div>`)
       console.warn(err)
     }
   })
@@ -562,11 +572,21 @@ export function finishView (view) {
     const content = $value.text()
     $value.unwrap()
     try {
-      const { root: data } = transform(content)
+      const { root, features } = markmapTransformer.transform(content)
+      // Sanitize node contents to prevent XSS before rendering
+      sanitizeMarkmapNode(root)
+
+      // Load required assets
+      const { styles, scripts } = markmapTransformer.getUsedAssets(features)
+
+      if (styles) loadCSS(styles)
+      if (scripts) loadJS(scripts, { getMarkmap: () => ({ Markmap }) })
+
       $elem.html('<div class="markmap-container"><svg></svg></div>')
       Markmap.create($elem.find('svg')[0], {
-        duration: 0
-      }, data)
+        duration: 0,
+        maxWidth: 0
+      }, root)
     } catch (err) {
       $elem.html(`<div class="alert alert-warning">${escapeHTML(err)}</div>`)
       console.warn(err)
@@ -634,11 +654,41 @@ export function finishView (view) {
       const cleanUrl = sanitizeUrl(url)
       const inner = $('<div></div>')
       $(this).append(inner)
-      setTimeout(() => {
-        PDFObject.embed(cleanUrl, inner, {
-          height: '400px'
+
+      // First check URL format
+      const isPDFByExtension = /\.pdf(\?.*)?$/i.test(cleanUrl) || cleanUrl.includes('pdf')
+
+      if (isPDFByExtension) {
+        // Show loading message while we check content type
+        const loadingMessage = $('<div class="alert alert-info">Verifying PDF file...</div>')
+        inner.html(loadingMessage)
+
+        // Perform additional validation with HEAD request
+        isPdfUrl(cleanUrl).then(isPDFByContentType => {
+          if (isPDFByContentType) {
+            // Valid PDF by content type, embed it
+            PDFObject.embed(cleanUrl, inner, {
+              height: '400px'
+            })
+          } else {
+            // URL format looks like PDF but content type doesn't match
+            inner.html('<div class="alert alert-warning">The URL looks like a PDF but the server didn\'t confirm it has a PDF content type.</div>')
+            console.warn('URL has PDF extension but content type is not application/pdf:', cleanUrl)
+
+            // Try to embed anyway as a fallback
+            setTimeout(() => {
+              PDFObject.embed(cleanUrl, inner, {
+                height: '400px',
+                fallbackLink: 'This doesn\'t appear to be a valid PDF. <a href="[url]">Click here to try downloading it directly</a>.'
+              })
+            }, 1)
+          }
         })
-      }, 1)
+      } else {
+        // Not a valid PDF URL by extension
+        inner.html('<div class="alert alert-danger">Invalid PDF URL. The URL must point to a PDF file.</div>')
+        console.warn('Invalid PDF URL format:', cleanUrl)
+      }
     })
     // syntax highlighting
   view.find('code.raw').removeClass('raw')
@@ -1489,4 +1539,26 @@ md.use(pdfPlugin)
 
 export default {
   md
+}
+
+// Add helper to sanitize markmap nodes against XSS using the global preventXSS
+function sanitizeMarkmapNode (node) {
+  if (!node || typeof node !== 'object') return
+  if (typeof node.content === 'string') {
+    try {
+      node.content = window.preventXSS(node.content)
+    } catch (e) {
+      // fallback: strip potentially dangerous characters
+      node.content = node.content.replace(/[<>]/g, '')
+    }
+  }
+  // remove dangerous href like javascript:
+  if (node.payload && typeof node.payload === 'object' && typeof node.payload.href === 'string') {
+    if (/^\s*javascript:/i.test(node.payload.href)) {
+      delete node.payload.href
+    }
+  }
+  if (Array.isArray(node.children)) {
+    node.children.forEach(sanitizeMarkmapNode)
+  }
 }
