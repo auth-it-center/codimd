@@ -1,7 +1,7 @@
-ARG RUNTIME
-ARG BUILDPACK
+ARG RUNTIME=hackmdio/runtime:16.20.2-35fe7e39
+ARG BUILDPACK=hackmdio/buildpack:16.20.2-35fe7e39
 
-FROM $BUILDPACK AS BUILD
+FROM $BUILDPACK AS build
 
 COPY --chown=hackmd:hackmd . .
 ENV QT_QPA_PLATFORM=offscreen
@@ -21,14 +21,16 @@ RUN set -xe && \
 
 FROM $RUNTIME
 USER root
-# RUN rm -f /etc/apt/sources.list.d/*.list && \
-#     echo "deb http://deb.debian.org/debian buster main" > /etc/apt/sources.list && \
-#     echo "deb http://deb.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list && \
-#     echo "deb http://deb.debian.org/debian buster-updates main" >> /etc/apt/sources.list && \
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends cron ldap-utils && \
+RUN set -eux; \
+    rm -f /etc/apt/sources.list.d/*.list; \
+    echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list; \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        cron \
+        ldap-utils; \
     rm -rf /var/lib/apt/lists/*
-COPY --from=BUILD /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
+COPY --from=build /home/hackmd/app/deployments/Cronjob /etc/cron.d/checkusers
 RUN chmod +x /etc/cron.d/checkusers
 RUN touch /var/log/cron.log
 RUN chmod u+s /usr/sbin/cron
